@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duuh</title>
+</head>
+<body>
+    <div id="msg"></div>
+    <script>
+        const messages=["Baka","Dattebayo","Nani","Sugoi","Kawai","Yamete","Itadakimasu","Arigatou","Oni-chan","Urusai","Yare Yare","Mou",
+        "Honto","Daijobu","Chotto Matte","Annyeong","Saranghaeyo","Oppa","unni","Hyung","Noona","Aigoo","Jinja?","Wae?",
+        "Daebak"
+        ];
+        document.getElement("msg").textContent=messages[Math.floor(Math.random()*messages.length)];
+    </script>
+</body>
+</html>

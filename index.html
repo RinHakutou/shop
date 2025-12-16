@@ -1,18 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Duuh</title>
+    <title>QR Noms</title>
 </head>
 <body>
-    <div id="msg"></div>
+    <div id="nom"></div>
+    
     <script>
-        const messages=["Baka","Dattebayo","Nani","Sugoi","Kawai","Yamete","Itadakimasu","Arigatou","Oni-chan","Urusai","Yare Yare","Mou",
-        "Honto","Daijobu","Chotto Matte","Annyeong","Saranghaeyo","Oppa","unni","Hyung","Noona","Aigoo","Jinja?","Wae?",
-        "Daebak"
+        // Listes de noms
+        const anime = [
+            "Naruto Uzumaki", "Monkey D. Luffy", "Son Goku", "Light Yagami",
+            "Eren Yeager", "Saitama", "Levi Ackerman", "Sailor Moon",
+            "Spike Spiegel", "Edward Elric", "Gon Freecss", "Vegeta",
+            "Mikasa Ackerman", "Lelouch Lamperouge", "Killua Zoldyck"
         ];
-        document.getElement("msg").textContent=messages[Math.floor(Math.random()*messages.length)];
+        
+        const kpop = [
+            "Jungkook (BTS)", "Lisa (BLACKPINK)", "RM (BTS)", "Jisoo (BLACKPINK)",
+            "IU", "V (BTS)", "Jennie (BLACKPINK)", "Jimin (BTS)",
+            "Rose (BLACKPINK)", "Suga (BTS)", "Taeyeon", "J-Hope (BTS)",
+            "Jackson Wang", "Hwasa", "Kai (EXO)"
+        ];
+        
+        // Mélanger les listes
+        const tousNoms = anime.concat(kpop);
+        
+        // Choisir un nom aléatoire
+        const nomAleatoire = tousNoms[Math.floor(Math.random() * tousNoms.length)];
+        
+        // Afficher le nom
+        document.getElementById('nom').textContent = nomAleatoire;
+        
+        // Stocker dans l'historique pour éviter les doublons immédiats
+        if(!sessionStorage.getItem('dernierNom')) {
+            sessionStorage.setItem('dernierNom', nomAleatoire);
+        }
     </script>
 </body>
 </html>

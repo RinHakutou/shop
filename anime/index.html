@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QR Noms</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            background-color: rgb(19, 19, 40);
+            min-height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #confetti-container{
+            position: fixed;
+            top: 0;
+            left:0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        .confetti{ou
+            position:absolute;
+            width: 8px;
+            height: 8px;
+            opacity: 0.9;
+            border-radius: 1px;
+        }
+        #nom{
+            text-align: center;
+            font-family:Verdana, Geneva, Tahoma, sans-serif;
+            margin:20%;
+            font-size: 100px;
+            border: 2px solid white;
+            border-radius: 5px;
+            background-color: white;
+            box-shadow: 0 0 10px black;
+        }
+    </style>
+</head>
+<body>
+    <div id="confetti-container"></div>
+    <div id="nom"></div>
+   
+    <script>
+        const confettiCount=200;
+        const colors=['#FF6B8B','#4ECDC4','#FFD166','#06D6A0','#118AB2','#EF476F','#9D4EDD','#FF9ABB','#A78BFA'];
+        let confettiPieces=[];
+        let animationId=null;
+        
+        function initConfetti(){
+            const container=document.getElementById('confetti-container');
+            for(let i=0;i<confettiCount;i++){
+                createConfettiPiece(container,i);
+            }
+            animateConfetti();
+        }
+        
+        function createConfettiPiece(container,index){
+            const confetti=document.createElement('div');
+            confetti.className='confetti';
+            const color=colors[Math.floor(Math.random()*colors.length)];
+            confetti.style.backgroundColor=color;
+            confetti.style.left=Math.random()*100+'vw';
+            confetti.style.top=Math.random()*100+'vh';
+            const size=6+Math.random()*8;
+            confetti.style.width=size+'px';
+            confetti.style.height=size+'px';
+            confetti.style.opacity=0.7+Math.random()*0.3;
+            
+            const piece={
+                element:confetti,
+                x:parseFloat(confetti.style.left),
+                y:parseFloat(confetti.style.top),
+                speed:1+Math.random()*3,
+                wind:0.1+Math.random()*0.3,
+                rotation:Math.random()*360,
+                rotationSpeed:(Math.random()-0.5)*5,
+                size:size
+            };
+            confettiPieces.push(piece);
+            container.appendChild(confetti);
+        }
+        
+        function animateConfetti(){
+            confettiPieces.forEach(piece=>{
+                piece.y += piece.speed *0.5;
+                piece.x +=Math.sin(Date.now()*0.001+piece.y*0.01)*piece.wind;
+                piece.rotation +=piece.rotationSpeed;
+                
+                if(piece.y>100){
+                    piece.y=-10;
+                    piece.x=Math.random()*100;
+                }
+                if(piece.x>100)piece.x=0;
+                if(piece.x <0)piece.x=100;
+                
+                piece.element.style.left=piece.x+'vw';
+                piece.element.style.top=piece.y+'vh';
+                piece.element.style.transform=`rotate(${piece.rotation}deg)`;
+            });
+            animationId=requestAnimationFrame(animateConfetti);
+        };
+        
+        window.addEventListener('load',initConfetti);
+        window.addEventListener('beforeunload',()=>{
+            if(animationId){
+                cancelAnimationFrame(animationId);
+            }
+        });
+        
+        // Liste de noms ANIME uniquement
+        const anime = [
+            "Naruto Uzumaki", "Monkey D. Luffy", "Son Goku", "Light Yagami",
+            "Eren Yeager", "Saitama", "Levi Ackerman", "Sailor Moon",
+            "Spike Spiegel", "Edward Elric", "Gon Freecss", "Vegeta",
+            "Mikasa Ackerman", "Lelouch Lamperouge", "Killua Zoldyck"
+        ];
+        
+        // Choisir un nom aléatoire
+        const nomAleatoire = anime[Math.floor(Math.random() * anime.length)];
+        
+        // Afficher le nom
+        document.getElementById('nom').textContent = nomAleatoire;
+        
+        // Stocker dans l'historique pour éviter les doublons immédiats
+        if(!sessionStorage.getItem('dernierNom')) {
+            sessionStorage.setItem('dernierNom', nomAleatoire);
+        }
+    </script>
+</body>
+</html>

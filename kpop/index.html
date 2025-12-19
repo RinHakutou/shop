@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>QR Noms</title>
+    <title>K-pop Idol Generator</title>
     <style>
         *{
             margin: 0;
@@ -9,7 +9,7 @@
             box-sizing: border-box;
         }
         body{
-            background-color: rgb(19, 19, 40);
+            background-color: beige;
             min-height: 100vh;
             overflow: hidden;
             display: flex;
@@ -23,13 +23,15 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
+            z-index: 10;
         }
         .confetti{
             position:absolute;
             width: 8px;
             height: 8px;
-            opacity: 0.9;
+            opacity: 0;
             border-radius: 1px;
+            transform-origin: center;
         }
         #nom{
             text-align: center;
@@ -40,6 +42,8 @@
             border-radius: 5px;
             background-color: white;
             box-shadow: 0 0 10px black;
+            position: relative;
+            z-index: 1;
         }
     </style>
 </head>
@@ -52,276 +56,206 @@
         const colors=['#FF6B8B','#4ECDC4','#FFD166','#06D6A0','#118AB2','#EF476F','#9D4EDD','#FF9ABB','#A78BFA'];
         let confettiPieces=[];
         let animationId=null;
+        let isAnimating=false;
         
-        function initConfetti(){
-            const container=document.getElementById('confetti-container');
-            for(let i=0;i<confettiCount;i++){
-                createConfettiPiece(container,i);
-            }
-            animateConfetti();
-        }
-        
-        function createConfettiPiece(container,index){
-            const confetti=document.createElement('div');
-            confetti.className='confetti';
-            const color=colors[Math.floor(Math.random()*colors.length)];
-            confetti.style.backgroundColor=color;
-            confetti.style.left=Math.random()*100+'vw';
-            confetti.style.top=Math.random()*100+'vh';
-            const size=6+Math.random()*8;
-            confetti.style.width=size+'px';
-            confetti.style.height=size+'px';
-            confetti.style.opacity=0.7+Math.random()*0.3;
+        function createConfettiExplosion(){
+            if(isAnimating) return;
+            isAnimating=true;
             
-            const piece={
-                element:confetti,
-                x:parseFloat(confetti.style.left),
-                y:parseFloat(confetti.style.top),
-                speed:1+Math.random()*3,
-                wind:0.1+Math.random()*0.3,
-                rotation:Math.random()*360,
-                rotationSpeed:(Math.random()-0.5)*5,
-                size:size
-            };
-            confettiPieces.push(piece);
-            container.appendChild(confetti);
+            const container=document.getElementById('confetti-container');
+            container.innerHTML='';
+            confettiPieces=[];
+            
+            const startX = 50;
+            const startY = 100;
+            
+            for(let i=0;i<confettiCount;i++){
+                const confetti=document.createElement('div');
+                confetti.className='confetti';
+                const color=colors[Math.floor(Math.random()*colors.length)];
+                confetti.style.backgroundColor=color;
+                const size=6+Math.random()*8;
+                confetti.style.width=size+'px';
+                confetti.style.height=size+'px';
+                
+                confetti.style.left=startX+'vw';
+                confetti.style.top=startY+'vh';
+                confetti.style.opacity='1';
+                
+                const piece={
+                    element:confetti,
+                    x:startX,
+                    y:startY,
+                    vx:(Math.random()-0.5)*4,
+                    vy:-8-Math.random()*6,
+                    gravity:0.2+Math.random()*0.2,
+                    rotation:0,
+                    rotationSpeed:(Math.random()-0.5)*10,
+                    size:size,
+                    opacity:1,
+                    fadeSpeed:0.003+Math.random()*0.003,
+                    color:color
+                };
+                confettiPieces.push(piece);
+                container.appendChild(confetti);
+            }
+            
+            if(animationId){
+                cancelAnimationFrame(animationId);
+            }
+            animateExplosion();
         }
         
-        function animateConfetti(){
+        function animateExplosion(){
+            let activePieces=0;
+            
             confettiPieces.forEach(piece=>{
-                piece.y += piece.speed *0.5;
-                piece.x +=Math.sin(Date.now()*0.001+piece.y*0.01)*piece.wind;
-                piece.rotation +=piece.rotationSpeed;
-                
-                if(piece.y>100){
-                    piece.y=-10;
-                    piece.x=Math.random()*100;
-                }
-                if(piece.x>100)piece.x=0;
-                if(piece.x <0)piece.x=100;
+                piece.vy += piece.gravity;
+                piece.x += piece.vx * 0.5;
+                piece.y += piece.vy * 0.5;
+                piece.rotation += piece.rotationSpeed;
+                piece.opacity -= piece.fadeSpeed;
                 
                 piece.element.style.left=piece.x+'vw';
                 piece.element.style.top=piece.y+'vh';
                 piece.element.style.transform=`rotate(${piece.rotation}deg)`;
+                piece.element.style.opacity=piece.opacity;
+                
+                if(piece.opacity>0){
+                    activePieces++;
+                }
             });
-            animationId=requestAnimationFrame(animateConfetti);
+            
+            if(activePieces>0){
+                animationId=requestAnimationFrame(animateExplosion);
+            }else{
+                isAnimating=false;
+                const container=document.getElementById('confetti-container');
+                container.innerHTML='';
+                confettiPieces=[];
+            }
         };
         
-        window.addEventListener('load',initConfetti);
+        // Only the MOST FAMOUS K-pop idols (including BabyMonster)
+        const kpop = [
+            // BABYMONSTER
+            ["Ahyeon", "BABYMONSTER"],
+            ["Ruka", "BABYMONSTER"],
+            ["Pharita", "BABYMONSTER"],
+            ["Asa", "BABYMONSTER"],
+            ["Rami", "BABYMONSTER"],
+            ["Rora", "BABYMONSTER"],
+            ["Chiquita", "BABYMONSTER"],
+            
+            // BLACKPINK
+            ["Jennie", "BLACKPINK"],
+            ["Lisa", "BLACKPINK"],
+            ["Rose", "BLACKPINK"],
+            ["Jisoo", "BLACKPINK"],
+            
+            // BTS
+            ["Jungkook", "BTS"],
+            ["V", "BTS"],
+            ["Jimin", "BTS"],
+            ["RM", "BTS"],
+            ["Suga", "BTS"],
+            ["J-Hope", "BTS"],
+            ["Jin", "BTS"],
+            
+            // TWICE
+            ["Momo", "TWICE"],
+            ["Sana", "TWICE"],
+            ["Mina", "TWICE"],
+            ["Tzuyu", "TWICE"],
+            ["Nayeon", "TWICE"],
+            ["Jihyo", "TWICE"],
+            
+            // NewJeans
+            ["Hanni", "NewJeans"],
+            ["Minji", "NewJeans"],
+            ["Danielle", "NewJeans"],
+            ["Haerin", "NewJeans"],
+            ["Hyein", "NewJeans"],
+            
+            // Stray Kids
+            ["Felix", "Stray Kids"],
+            ["Bang Chan", "Stray Kids"],
+            ["Hyunjin", "Stray Kids"],
+            
+            // IVE
+            ["Wonyoung", "IVE"],
+            ["Yujin", "IVE"],
+            ["Liz", "IVE"],
+            ["Rei", "IVE"],
+            ["Gaeul", "IVE"],
+            ["Leeseo", "IVE"],
+            
+            // aespa
+            ["Karina", "aespa"],
+            ["Winter", "aespa"],
+            ["Giselle", "aespa"],
+            ["Ningning", "aespa"],
+            
+            // ITZY
+            ["Yeji", "ITZY"],
+            ["Ryujin", "ITZY"],
+            ["Yuna", "ITZY"],
+            
+            // LE SSERAFIM
+            ["Chaewon", "LE SSERAFIM"],
+            ["Sakura", "LE SSERAFIM"],
+            ["Yunjin", "LE SSERAFIM"],
+            ["Kazuha", "LE SSERAFIM"],
+            ["Eunchae", "LE SSERAFIM"],
+            
+            // EXO
+            ["Kai", "EXO"],
+            ["Baekhyun", "EXO"],
+            ["Chanyeol", "EXO"],
+            
+            // NCT
+            ["Taeyong", "NCT"],
+            ["Mark", "NCT"],
+            ["Jaehyun", "NCT"],
+            
+            // SEVENTEEN
+            ["Mingyu", "SEVENTEEN"],
+            ["S.Coups", "SEVENTEEN"],
+            ["Vernon", "SEVENTEEN"],
+            
+            // (G)I-DLE
+            ["Soyeon", "(G)I-DLE"],
+            ["Miyeon", "(G)I-DLE"],
+            ["Minnie", "(G)I-DLE"],
+            ["Yuqi", "(G)I-DLE"],
+            
+            // Soloists
+            ["IU", "Soloist"],
+            ["Taeyeon", "SNSD/Soloist"],
+            ["Sunmi", "Soloist"],
+            ["Chungha", "Soloist"]
+        ];
+        
+        function showNewIdol(){
+            const [idol, group] = kpop[Math.floor(Math.random() * kpop.length)];
+            
+            document.getElementById('nom').innerHTML = `
+                <div style="font-size: 80px; margin-bottom: 10px;">${idol}</div>
+                <div style="font-size: 40px; color: #666;">${group}</div>
+            `;
+            
+            createConfettiExplosion();
+        }
+        
+        window.addEventListener('load', function(){
+            showNewIdol();
+        });
+        
         window.addEventListener('beforeunload',()=>{
             if(animationId){
                 cancelAnimationFrame(animationId);
             }
         });
-        
-        // Liste de noms K-POP uniquement
-        const kpop = [
-          // BTS
-  "Jungkook (BTS)",
-  "V (BTS)",
-  "Jimin (BTS)",
-  "Suga (BTS)",
-  "RM (BTS)",
-  "Jin (BTS)",
-  "J-Hope (BTS)",
-  
-  // BLACKPINK
-  "Lisa (BLACKPINK)",
-  "Jennie (BLACKPINK)",
-  "Rose (BLACKPINK)",
-  "Jisoo (BLACKPINK)",
-  
-  // SOLO
-  "IU (Solo)",
-  "Taeyeon (Solo)",
-  "Sunmi (Solo)",
-  
-  // MAMAMOO
-  "Hwasa (MAMAMOO)",
-  "Solar (MAMAMOO)",
-  "Moonbyul (MAMAMOO)",
-  "Wheein (MAMAMOO)",
-  
-  // ITZY
-  "Yeji (ITZY)",
-  "Lia (ITZY)",
-  "Ryujin (ITZY)",
-  "Chaeryeong (ITZY)",
-  "Yuna (ITZY)",
-  
-  // BABYMONSTER
-  "Ruka (BABYMONSTER)",
-  "Pharita (BABYMONSTER)",
-  "Asa (BABYMONSTER)",
-  "Ahyeon (BABYMONSTER)",
-  "Rami (BABYMONSTER)",
-  "Rora (BABYMONSTER)",
-  "Chiquita (BABYMONSTER)",
-  
-  // STRAY KIDS
-  "Bang Chan (Stray Kids)",
-  "Lee Know (Stray Kids)",
-  "Changbin (Stray Kids)",
-  "Hyunjin (Stray Kids)",
-  "Han (Stray Kids)",
-  "Felix (Stray Kids)",
-  "Seungmin (Stray Kids)",
-  "IN (Stray Kids)",
-  
-  // AESPA
-  "Karina (aespa)",
-  "Winter (aespa)",
-  "Giselle (aespa)",
-  "Ningning (aespa)",
-  
-  // IVE
-  "Wonyoung (IVE)",
-  "Yujin (IVE)",
-  "Rei (IVE)",
-  "Gaeul (IVE)",
-  "Liz (IVE)",
-  "Leeseo (IVE)",
-  
-  // LE SSERAFIM
-  "Sakura (LE SSERAFIM)",
-  "Chaewon (LE SSERAFIM)",
-  "Yunjin (LE SSERAFIM)",
-  "Kazuha (LE SSERAFIM)",
-  "Eunchae (LE SSERAFIM)",
-  
-  // TWICE
-  "Nayeon (TWICE)",
-  "Jeongyeon (TWICE)",
-  "Momo (TWICE)",
-  "Sana (TWICE)",
-  "Jihyo (TWICE)",
-  "Mina (TWICE)",
-  "Dahyun (TWICE)",
-  "Chaeyoung (TWICE)",
-  "Tzuyu (TWICE)",
-  
-  // NCT
-  "Mark (NCT)",
-  "Taeyong (NCT)",
-  "Yuta (NCT)",
-  "Doyoung (NCT)",
-  "Jaehyun (NCT)",
-  "Jungwoo (NCT)",
-  "Haechan (NCT)",
-  "Renjun (NCT)",
-  "Jeno (NCT)",
-  "Jaemin (NCT)",
-  "Chenle (NCT)",
-  "Jisung (NCT)",
-  
-  // EXO
-  "Kai (EXO)",
-  "Baekhyun (EXO)",
-  "D.O. (EXO)",
-  "Chanyeol (EXO)",
-  "Suho (EXO)",
-  "Sehun (EXO)",
-  "Xiumin (EXO)",
-  "Lay (EXO)",
-  "Chen (EXO)",
-  
-  // SHINee
-  "Taemin (SHINee)",
-  "Key (SHINee)",
-  "Minho (SHINee)",
-  "Onew (SHINee)",
-  
-  // GOT7
-  "Bambam (GOT7)",
-  "Jackson (GOT7)",
-  "Yugyeom (GOT7)",
-  "Youngjae (GOT7)",
-  "Jinyoung (GOT7)",
-  
-  // ATEEZ
-  "Hongjoong (ATEEZ)",
-  "Seonghwa (ATEEZ)",
-  "Yunho (ATEEZ)",
-  "Yeosang (ATEEZ)",
-  "San (ATEEZ)",
-  "Mingi (ATEEZ)",
-  "Wooyoung (ATEEZ)",
-  "Jongho (ATEEZ)",
-  
-  // TXT
-  "Soobin (TXT)",
-  "Yeonjun (TXT)",
-  "Beomgyu (TXT)",
-  "Taehyun (TXT)",
-  "Hueningkai (TXT)",
-  
-  // MONSTA X
-  "Shownu (MONSTA X)",
-  "Minhyuk (MONSTA X)",
-  "Kihyun (MONSTA X)",
-  "Hyungwon (MONSTA X)",
-  "Jooheon (MONSTA X)",
-  "I.M (MONSTA X)",
-  
-  // SEVENTEEN
-  "Hoshi (SEVENTEEN)",
-  "Woozi (SEVENTEEN)",
-  "The8 (SEVENTEEN)",
-  "Minghao (SEVENTEEN)",
-  "Vernon (SEVENTEEN)",
-  "Seungkwan (SEVENTEEN)",
-  "Dino (SEVENTEEN)",
-  "Joshua (SEVENTEEN)",
-  "DK (SEVENTEEN)",
-  "Jeonghan (SEVENTEEN)",
-  "Jun (SEVENTEEN)",
-  
-  // (G)I-DLE
-  "Soyeon ((G)I-DLE)",
-  "Miyeon ((G)I-DLE)",
-  "Minnie ((G)I-DLE)",
-  "Yuqi ((G)I-DLE)",
-  "Shuhua ((G)I-DLE)",
-  
-  // DREAMCATCHER
-  "Siyeon (Dreamcatcher)",
-  "Yoohyeon (Dreamcatcher)",
-  "Dami (Dreamcatcher)",
-  "Gahyeon (Dreamcatcher)",
-  "Jiu (Dreamcatcher)",
-  "Sua (Dreamcatcher)",
-  
-  // EVERGLOW
-  "Yiren (EVERGLOW)",
-  "Mia (EVERGLOW)",
-  "Onda (EVERGLOW)",
-  "Aisha (EVERGLOW)",
-  
-  // NEWJEANS
-  "Minji (NewJeans)",
-  "Hanni (NewJeans)",
-  "Danielle (NewJeans)",
-  "Haerin (NewJeans)",
-  "Hyein (NewJeans)",
-  
-  // RED VELVET
-  "Irene (Red Velvet)",
-  "Seulgi (Red Velvet)",
-  "Wendy (Red Velvet)",
-  "Joy (Red Velvet)",
-  "Yeri (Red Velvet)"
-        ];
-        
-        // Choisir un nom aléatoire
-        const nomAleatoire = kpop[Math.floor(Math.random() * kpop.length)];
-        
-        // Afficher le nom
-        document.getElementById('nom').textContent = nomAleatoire;
-        
-        // Stocker dans l'historique pour éviter les doublons immédiats
-        if(!sessionStorage.getItem('dernierNom')) {
-            sessionStorage.setItem('dernierNom', nomAleatoire);
-        }
     </script>
 </body>
 </html>

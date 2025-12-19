@@ -9,7 +9,7 @@
             box-sizing: border-box;
         }
         body{
-            background-color: rgb(19, 19, 40);
+            background-color: beige;
             min-height: 100vh;
             overflow: hidden;
             display: flex;
@@ -23,13 +23,15 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
+            z-index: 10;
         }
         .confetti{
             position:absolute;
             width: 8px;
             height: 8px;
-            opacity: 0.9;
+            opacity: 0;
             border-radius: 1px;
+            transform-origin: center;
         }
         #nom{
             text-align: center;
@@ -40,6 +42,8 @@
             border-radius: 5px;
             background-color: white;
             box-shadow: 0 0 10px black;
+            position: relative;
+            z-index: 1;
         }
     </style>
 </head>
@@ -52,107 +56,232 @@
         const colors=['#FF6B8B','#4ECDC4','#FFD166','#06D6A0','#118AB2','#EF476F','#9D4EDD','#FF9ABB','#A78BFA'];
         let confettiPieces=[];
         let animationId=null;
+        let isAnimating=false;
         
-        function initConfetti(){
-            const container=document.getElementById('confetti-container');
-            for(let i=0;i<confettiCount;i++){
-                createConfettiPiece(container,i);
-            }
-            animateConfetti();
-        }
-        
-        function createConfettiPiece(container,index){
-            const confetti=document.createElement('div');
-            confetti.className='confetti';
-            const color=colors[Math.floor(Math.random()*colors.length)];
-            confetti.style.backgroundColor=color;
-            confetti.style.left=Math.random()*100+'vw';
-            confetti.style.top=Math.random()*100+'vh';
-            const size=6+Math.random()*8;
-            confetti.style.width=size+'px';
-            confetti.style.height=size+'px';
-            confetti.style.opacity=0.7+Math.random()*0.3;
+        function createConfettiExplosion(){
+            if(isAnimating) return;
+            isAnimating=true;
             
-            const piece={
-                element:confetti,
-                x:parseFloat(confetti.style.left),
-                y:parseFloat(confetti.style.top),
-                speed:1+Math.random()*3,
-                wind:0.1+Math.random()*0.3,
-                rotation:Math.random()*360,
-                rotationSpeed:(Math.random()-0.5)*5,
-                size:size
-            };
-            confettiPieces.push(piece);
-            container.appendChild(confetti);
+            const container=document.getElementById('confetti-container');
+            container.innerHTML='';
+            confettiPieces=[];
+            
+            const startX = 50;
+            const startY = 100;
+            
+            for(let i=0;i<confettiCount;i++){
+                const confetti=document.createElement('div');
+                confetti.className='confetti';
+                const color=colors[Math.floor(Math.random()*colors.length)];
+                confetti.style.backgroundColor=color;
+                const size=6+Math.random()*8;
+                confetti.style.width=size+'px';
+                confetti.style.height=size+'px';
+                
+                confetti.style.left=startX+'vw';
+                confetti.style.top=startY+'vh';
+                confetti.style.opacity='1';
+                
+                const piece={
+                    element:confetti,
+                    x:startX,
+                    y:startY,
+                    vx:(Math.random()-0.5)*4,
+                    vy:-8-Math.random()*6,
+                    gravity:0.2+Math.random()*0.2,
+                    rotation:0,
+                    rotationSpeed:(Math.random()-0.5)*10,
+                    size:size,
+                    opacity:1,
+                    fadeSpeed:0.003+Math.random()*0.003,
+                    color:color
+                };
+                confettiPieces.push(piece);
+                container.appendChild(confetti);
+            }
+            
+            if(animationId){
+                cancelAnimationFrame(animationId);
+            }
+            animateExplosion();
         }
         
-        function animateConfetti(){
+        function animateExplosion(){
+            let activePieces=0;
+            
             confettiPieces.forEach(piece=>{
-                piece.y += piece.speed *0.5;
-                piece.x +=Math.sin(Date.now()*0.001+piece.y*0.01)*piece.wind;
-                piece.rotation +=piece.rotationSpeed;
-                
-                if(piece.y>100){
-                    piece.y=-10;
-                    piece.x=Math.random()*100;
-                }
-                if(piece.x>100)piece.x=0;
-                if(piece.x <0)piece.x=100;
+                piece.vy += piece.gravity;
+                piece.x += piece.vx * 0.5;
+                piece.y += piece.vy * 0.5;
+                piece.rotation += piece.rotationSpeed;
+                piece.opacity -= piece.fadeSpeed;
                 
                 piece.element.style.left=piece.x+'vw';
                 piece.element.style.top=piece.y+'vh';
                 piece.element.style.transform=`rotate(${piece.rotation}deg)`;
+                piece.element.style.opacity=piece.opacity;
+                
+                if(piece.opacity>0){
+                    activePieces++;
+                }
             });
-            animationId=requestAnimationFrame(animateConfetti);
+            
+            if(activePieces>0){
+                animationId=requestAnimationFrame(animateExplosion);
+            }else{
+                isAnimating=false;
+                const container=document.getElementById('confetti-container');
+                container.innerHTML='';
+                confettiPieces=[];
+            }
         };
         
-        window.addEventListener('load',initConfetti);
+        const anime = [
+            ["Goku", "Dragon Ball"],
+            ["Naruto", "Naruto"],
+            ["Luffy", "One Piece"],
+            ["Saitama", "One Punch Man"],
+            ["Eren", "Attack on Titan"],
+            ["Levi", "Attack on Titan"],
+            ["Light", "Death Note"],
+            ["Lelouch", "Code Geass"],
+            ["Edward", "Fullmetal Alchemist"],
+            ["Spike", "Cowboy Bebop"],
+            ["Totoro", "Mon Voisin Totoro"],
+            ["Ash", "Pokémon"],
+            ["Sailor Moon", "Sailor Moon"],
+            ["Sakura", "Cardcaptor Sakura"],
+            ["Gon", "Hunter x Hunter"],
+            ["Killua", "Hunter x Hunter"],
+            ["Inuyasha", "Inuyasha"],
+            ["Sesshomaru", "Inuyasha"],
+            ["Kenshin", "Samurai X"],
+            ["Vegeta", "Dragon Ball"],
+            ["Sasuke", "Naruto"],
+            ["Zoro", "One Piece"],
+            ["Natsu", "Fairy Tail"],
+            ["Ichigo", "Bleach"],
+            ["Tanjiro", "Demon Slayer"],
+            ["Nezuko", "Demon Slayer"],
+            ["Gojo", "Jujutsu Kaisen"],
+            ["Itadori", "Jujutsu Kaisen"],
+            ["Megumi", "Jujutsu Kaisen"],
+            ["Kakashi", "Naruto"],
+            ["Jotaro", "JoJo's Bizarre Adventure"],
+            ["Dio", "JoJo's Bizarre Adventure"],
+            ["Alphonse", "Fullmetal Alchemist"],
+            ["Roy", "Fullmetal Alchemist"],
+            ["Vash", "Trigun"],
+            ["Guts", "Berserk"],
+            ["Shinji", "Evangelion"],
+            ["Gohan", "Dragon Ball"],
+            ["Trunks", "Dragon Ball"],
+            ["Piccolo", "Dragon Ball"],
+            ["L", "Death Note"],
+            ["Mikasa", "Attack on Titan"],
+            ["Armin", "Attack on Titan"],
+            ["Jean", "Attack on Titan"],
+            ["Reiner", "Attack on Titan"],
+            ["Gintoki", "Gintama"],
+            ["Kagura", "Gintama"],
+            ["Hijikata", "Gintama"],
+            ["Kyon", "The Melancholy of Haruhi Suzumiya"],
+            ["Haruhi", "The Melancholy of Haruhi Suzumiya"],
+            ["Kirito", "Sword Art Online"],
+            ["Asuna", "Sword Art Online"],
+            ["Eugeo", "Sword Art Online"],
+            ["Rimuru", "That Time I Got Reincarnated as a Slime"],
+            ["Shizu", "That Time I Got Reincarnated as a Slime"],
+            ["Mob", "Mob Psycho 100"],
+            ["Reigen", "Mob Psycho 100"],
+            ["Ritsu", "Mob Psycho 100"],
+            ["Maka", "Soul Eater"],
+            ["Soul", "Soul Eater"],
+            ["Black Star", "Soul Eater"],
+            ["Tsubaki", "Soul Eater"],
+            ["Death", "Soul Eater"],
+            ["Ryuk", "Death Note"],
+            ["Misa", "Death Note"],
+            ["Yagami", "Death Note"],
+            ["Yusuke", "Yu Yu Hakusho"],
+            ["Hiei", "Yu Yu Hakusho"],
+            ["Kurama", "Yu Yu Hakusho"],
+            ["Kuwabara", "Yu Yu Hakusho"],
+            ["Shoyo", "Haikyuu!!"],
+            ["Tobio", "Haikyuu!!"],
+            ["Kageyama", "Haikyuu!!"],
+            ["Oikawa", "Haikyuu!!"],
+            ["Ushijima", "Haikyuu!!"],
+            ["Soma", "Food Wars"],
+            ["Erina", "Food Wars"],
+            ["Saiki", "Saiki K"],
+            ["Nendo", "Saiki K"],
+            ["Hinata", "Haikyuu!!"],
+            ["Nishinoya", "Haikyuu!!"],
+            ["Tanaka", "Haikyuu!!"],
+            ["Daichi", "Haikyuu!!"],
+            ["Kuroko", "Kuroko's Basketball"],
+            ["Kagami", "Kuroko's Basketball"],
+            ["Midorima", "Kuroko's Basketball"],
+            ["Aomine", "Kuroko's Basketball"],
+            ["Akashi", "Kuroko's Basketball"],
+            ["Yato", "Noragami"],
+            ["Yukine", "Noragami"],
+            ["Hiyori", "Noragami"],
+            ["Asta", "Black Clover"],
+            ["Yuno", "Black Clover"],
+            ["Noelle", "Black Clover"],
+            ["Yami", "Black Clover"],
+            ["Vanessa", "Black Clover"],
+            ["Kaneki", "Tokyo Ghoul"],
+            ["Touka", "Tokyo Ghoul"],
+            ["Hide", "Tokyo Ghoul"],
+            ["Ayato", "Tokyo Ghoul"],
+            ["Rize", "Tokyo Ghoul"],
+            ["Deku", "My Hero Academia"],
+            ["Bakugo", "My Hero Academia"],
+            ["Todoroki", "My Hero Academia"],
+            ["All Might", "My Hero Academia"],
+            ["Ochaco", "My Hero Academia"],
+            ["Iida", "My Hero Academia"],
+            ["Tsuyu", "My Hero Academia"],
+            ["Shoto", "My Hero Academia"],
+            ["Endeavor", "My Hero Academia"],
+            ["Hawks", "My Hero Academia"],
+            ["Dabi", "My Hero Academia"],
+            ["Shigaraki", "My Hero Academia"],
+            ["Hange", "Attack on Titan"],
+            ["Erwin", "Attack on Titan"],
+            ["Sasha", "Attack on Titan"],
+            ["Connie", "Attack on Titan"],
+            ["Annie", "Attack on Titan"],
+            ["Bertolt", "Attack on Titan"],
+            ["Ymir", "Attack on Titan"],
+            ["Historia", "Attack on Titan"],
+            ["Zeke", "Attack on Titan"]
+        ];
+        
+        function showNewName(){
+            const [personnage, animeNom] = anime[Math.floor(Math.random() * anime.length)];
+            
+            document.getElementById('nom').innerHTML = `
+                <div style="font-size: 80px; margin-bottom: 10px;">${personnage}</div>
+                <div style="font-size: 40px; color: #666;">${animeNom}</div>
+            `;
+            
+            createConfettiExplosion();
+        }
+        
+        window.addEventListener('load', function(){
+            showNewName();
+            // SUPPRIMÉ: setInterval(showNewName, 5000);
+        });
+        
         window.addEventListener('beforeunload',()=>{
             if(animationId){
                 cancelAnimationFrame(animationId);
             }
         });
-        
-        // Liste de noms ANIME uniquement
-        const anime = [
-    "Goku", "Naruto", "Luffy", "Saitama", "Eren", 
-  "Levi", "Light", "Lelouch", "Edward", "Spike",
-  "Totoro", "Ash", "Sailor Moon", "Sakura", "Gon",
-  "Killua", "Inuyasha", "Sesshomaru", "Kenshin", "Vegeta",
-  "Sasuke", "Zoro", "Natsu", "Ichigo", "Tanjiro",
-  "Nezuko", "Gojo", "Itadori", "Megumi", "Kakashi",
-  "Jotaro", "Dio", "Alphonse", "Roy", "Vash",
-  "Guts", "Shinji", "Gohan", "Trunks", "Piccolo",
-  "L", "Mikasa", "Armin", "Jean", "Reiner",
-  "Gintoki", "Kagura", "Hijikata", "Kyon", "Haruhi",
-  "Kirito", "Asuna", "Eugeo", "Rimuru", "Shizu",
-  "Mob", "Reigen", "Ritsu", "Maka", "Soul",
-  "Black Star", "Tsubaki", "Death", "Ryuk", "Misa",
-  "Yagami", "Yusuke", "Hiei", "Kurama", "Kuwabara",
-  "Shoyo", "Tobio", "Kageyama", "Oikawa", "Ushijima",
-  "Soma", "Erina", "Megumi", "Saiki", "Nendo",
-  "Hinata", "Kageyama", "Nishinoya", "Tanaka", "Daichi",
-  "Kuroko", "Kagami", "Midorima", "Aomine", "Akashi",
-  "Yato", "Yukine", "Hiyori", "Asta", "Yuno",
-  "Noelle", "Yami", "Vanessa", "Kaneki", "Touka",
-  "Hide", "Ayato", "Rize", "Deku", "Bakugo",
-  "Todoroki", "All Might", "Ochaco", "Iida", "Tsuyu",
-  "Shoto", "Endeavor", "Hawks", "Dabi", "Shigaraki",
-  "Eren", "Mikasa", "Armin", "Levi", "Erwin",
-  "Hange", "Sasha", "Connie", "Jean", "Reiner",
-  "Annie", "Bertolt", "Ymir", "Historia", "Zeke"];
-        
-        // Choisir un nom aléatoire
-        const nomAleatoire = anime[Math.floor(Math.random() * anime.length)];
-        
-        // Afficher le nom
-        document.getElementById('nom').textContent = nomAleatoire;
-        
-        // Stocker dans l'historique pour éviter les doublons immédiats
-        if(!sessionStorage.getItem('dernierNom')) {
-            sessionStorage.setItem('dernierNom', nomAleatoire);
-        }
     </script>
 </body>
 </html>
